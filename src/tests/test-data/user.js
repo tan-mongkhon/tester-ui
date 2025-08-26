@@ -20,7 +20,14 @@ const inValidUser = [
     {
         username: "locked_out_user",
         password: "secret_sauce"
+    },
+
+    {
+        username: "testt_user",
+        password: "test_sauce"
     }
+
+
 
 ];
 

@@ -1,77 +1,107 @@
-// import { expect } from "@playwright/test";
-// import { test } from "./pages/base";
-// import { validUser } from "./test-data/user";
+import { test } from "../tests/pages/base.ts";
+import { expect } from "@playwright/test";
+import { ProductPage } from "./pages/product.page.js";
 
-// validUser.forEach(({ username, password }) => {
-//   test(`Adding all available products to the cart and then removing them, verifying that the cart updates correctly: ${username}`, async ({
-//     loginPage,
-//     productPage,
-//     cartPage,
-//   }) => {
-//     // ✅ ส่ง username กับ password แยกกัน
-//     await loginPage.loginValidUser(username, password);
-//     await productPage.addAllProductsToCart();
-//     await productPage.goToCart();
-//     await cartPage.removeAllProducts();
+test("TC-007 : Adding all available products to the cart and then removing them, verifying that the cart updates correctly", async ({
+  loginPageFixtures,
+  page,
+}) => {
+  const product = new ProductPage(page);
 
-//     const empty = await cartPage.isCartEmpty();
-//     expect(empty).toBeTruthy();
-//   });
-// });
+  await product.allAddtoCart();
+  // ตรวจว่าตัวเลขตรงกับจำนวนสินค้าที่เพิ่ม
+  const count = await product.removeCartBtn.count();
+  await expect(product.cartBadge).toHaveText(String(count));
 
-// validUser.forEach(({ username, password }) => {
-//   test(`Should navigate to the cart page when clicking the cart icon ${username}`, async ({
-//     page,
-//     loginPage,
-//     productPage,
-//   }) => {
-//     await loginPage.loginValidUser(username, password);
-//     await productPage.goToCart();
-//     await expect(page).toHaveURL(/.*cart\.html/)
-//   });
-// });
+  await product.gotoCart();
+  await product.removeAllCart();
+  // ตรวจว่าตัวเลขตรงกับจำนวนสินค้าที่เพิ่ม
+  await expect(product.cartBadge).toHaveCount(0);
+});
 
+test("TC-008 : Product should correctly sorts items from A to Z ", async ({
+  loginPageFixtures,
+  page,
+}) => {
+  const product = new ProductPage(page);
 
-// test('Product sorting A→Z >> should sort items from A to Z for standard_user',
-//   async ({ page, loginPage, productPage }) => {
-  
-//   // 1. ตรวจว่ามี fixture ครบ
-//   if (!loginPage || !productPage) {
-//     throw new Error("Missing required fixtures: loginPage or productPage");
-//   }
+  await product.sortBy("az");
+  await page.waitForSelector(".inventory_item_name", {
+    state: "visible",
+    timeout: 3000,
+  });
 
-//   // 2. ล็อกอิน
-//   await loginPage.loginValidUser('standard_user', 'secret_sauce');
+  const names = await product.getAllProductName();
+  //   names = names.map((name) => String(name).trim());
+  const sorted = [...names].sort((a, b) =>
+    a.toLocaleLowerCase().localeCompare(b.toLocaleLowerCase())
+  );
 
-//   // 3. สั่งเรียง A → Z
-//   await productPage.sortBy("az");
+  expect(names).toEqual(sorted);
+});
 
-//   // 4. รอให้สินค้าบนหน้าถูกโหลด
-//   await page.waitForSelector('.inventory_item_name', { state: 'visible', timeout: 5000 });
+test("TC-009 : Product should correctly sorts items from Z to A ", async ({
+  loginPageFixtures,
+  page,
+}) => {
+  const product = new ProductPage(page);
 
-//   // 5. ตรวจว่าอยู่หน้า Products
-//   const titleLocator = page.locator('.title');
-//   await expect(titleLocator).toHaveText(/Products/i); // ใช้ regex กันพิมพ์ใหญ่เล็กไม่ตรง
+  await product.sortBy("za");
+  await page.waitForSelector(".inventory_item_name", {
+    state: "visible",
+    timeout: 3000,
+  });
 
-//   // 6. ดึงชื่อสินค้าทั้งหมด
-//   let names = await productPage.getAllProductNames();
+  const names = await product.getAllProductName();
+  //   names = names.map((name) => String(name).trim());
+  const sorted = [...names].sort((a, b) =>
+    b.toLocaleLowerCase().localeCompare(a.toLocaleLowerCase())
+  );
 
-//   // ป้องกัน null หรือไม่ใช่ array
-//   if (!Array.isArray(names) || names.length === 0) {
-//     throw new Error("Product names list is empty or invalid");
-//   }
+  expect(names).toEqual(sorted);
+});
 
-//   // 7. ตัดช่องว่าง และบังคับเป็น string ทั้งหมด
-//   names = names.map(name => String(name).trim());
+test("TC-010 : Product should correctly sorts items from price low to high ", async ({
+  loginPageFixtures,
+  page,
+}) => {
+  const product = new ProductPage(page);
 
-//   // 8. สร้างอาเรย์ใหม่ที่เรียงตาม A → Z
-//   const sorted = [...names].sort((a, b) =>
-//     a.toLocaleLowerCase().localeCompare(b.toLocaleLowerCase())
-//   );
+  await product.sortBy("lohi");
+  await page.waitForSelector(".inventory_item_price", {
+    state: "visible",
+    timeout: 3000,
+  });
 
-//   // 9. เปรียบเทียบว่าลำดับที่เว็บแสดงตรงกับที่เรียงไว้
-//   expect(names).toEqual(sorted);
-// });
+  const priceProduct = await product.getAllProductPrices();
+  const sorted = [...priceProduct].sort((a, b) => a - b);
 
+  expect(priceProduct).toEqual(sorted);
+});
 
+test("TC-011 : Product should correctly sorts items from price high to low ", async ({
+  loginPageFixtures,
+  page,
+}) => {
+  const product = new ProductPage(page);
 
+  await product.sortBy("hilo");
+  await page.waitForSelector(".inventory_item_price", {
+    state: "visible",
+    timeout: 3000,
+  });
+
+  const priceProduct = await product.getAllProductPrices();
+  const sorted = [...priceProduct].sort((a, b) => b - a);
+
+  expect(priceProduct).toEqual(sorted);
+});
+
+test('TC-012 : Should navigate to the cart page when clicking the cart icon',async ({
+    loginPageFixtures,page
+})=>{
+    const product = new ProductPage(page);
+    
+    await product.gotoCart();
+    await expect(page).toHaveURL(/cart\.html/);
+})
