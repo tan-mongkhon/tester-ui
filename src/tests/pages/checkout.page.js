@@ -64,6 +64,11 @@ export class CheckoutPage {
     await this.lastName.fill(lastname);
     await this.postalCode.fill(code);
   }
+    async inputSomeDataName(firstname, lastname) {
+    await this.firstName.fill(firstname);
+    await this.lastName.fill(lastname);
+
+  }
 
   async cancelCheckout() {
     await this.cancelBtn.click();

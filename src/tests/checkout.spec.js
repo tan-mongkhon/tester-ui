@@ -28,7 +28,7 @@ test('TC-020 : When clicking "Continue" with some client information, should dis
   page,
 }) => {
   const checkout = new CheckoutPage(page);
-  await checkout.inputDataName("Emily", "Harrison");
+  await checkout.inputSomeDataName("Emily", "Harrison");
   await checkout.continueCheckout();
   const textError = await checkout.getErrorText();
   expect(textError).toContain("Error");
@@ -65,7 +65,6 @@ test("TC-024 : Should correctly calculate the total, tax, and grand total", asyn
   page,
 }) => {
   const checkout = new CheckoutPage(page);
-  const cart = new CartPage(page);
   await checkout.inputDataName("Emily", "Harrison", "90210");
   await checkout.continueCheckout();
   await expect(page).toHaveURL(/checkout-step-two\.html/);
@@ -103,7 +102,6 @@ test('TC-026 : When clicking "Finish", should process to the checkout complete p
   page,
 }) => {
   const checkout = new CheckoutPage(page);
-  //   const cart = new CartPage(page);
   await checkout.inputDataName("Emily", "Harrison", "90210");
   await checkout.continueCheckout();
   await expect(page).toHaveURL(/checkout-step-two\.html/);
@@ -132,7 +130,6 @@ test('TC-028 : Display message ', async ({
   page,
 }) => {
   const checkout = new CheckoutPage(page);
-  //   const cart = new CartPage(page);
   await checkout.inputDataName("Emily", "Harrison", "90210");
   await checkout.continueCheckout();
   await expect(page).toHaveURL(/checkout-step-two\.html/);
@@ -144,12 +141,11 @@ test('TC-028 : Display message ', async ({
 
 });
 
-test.only('TC-029 : Display message ', async ({
+test('TC-029 : Display message ', async ({
   checkoutPageFixtures,
   page,
 }) => {
   const checkout = new CheckoutPage(page);
-  //   const cart = new CartPage(page);
   await checkout.inputDataName("Emily", "Harrison", "90210");
   await checkout.continueCheckout();
   await expect(page).toHaveURL(/checkout-step-two\.html/);
